@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Test</title>
+</head>
+<body>
+    <h1>Part 1 Test Page</h1>
+    <button onclick="runTest()">Run Test</button>
+    <div id="output"></div>
+
+    <script src="./inventory.js"></script>
+    <script>
+        function runTest() {
+            const result = inventoryApp.addItem("Test Laptop", "ITM001", "Electronics", 1200, 3, "SupA", true);
+            document.getElementById('output').innerHTML = `<p>${result}</p>`;
+            
+            const item = inventoryApp.inventory[0];
+            if(item) {
+                const status = inventoryApp.getStockStatus(item);
+                document.getElementById('output').innerHTML += `<p>Status: ${status}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
