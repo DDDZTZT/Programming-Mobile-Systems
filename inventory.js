@@ -1,62 +1,90 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-let inventory = [];
-function addItem(name, id, category, price, quantity, supplierName, isPopular, comment) {
-    //check id is unique
-    if (inventory.some(item => item.id === id)) {
-        return `Item with ID ${id} already exists.`;
+var inventoryList = [];
+function calculateStockStatus(qty) {
+    if (qty <= 0)
+        return 'Out of Stock';
+    if (qty <= 10)
+        return 'Low Stock';
+    return 'In Stock';
+}
+function addItem(itemId, itemName, category, quantity, price, supplierName, isPopular, comment) {
+    if (!itemName || !category || !supplierName) {
+        return 'Error: All fields except Comment are required!';
     }
-    const newItem = {
-        name,
-        id,
-        category,
-        price,
-        quantity,
-        supplierName,
-        isPopular
+    if (quantity < 0 || price < 0) {
+        return 'Error: Price & Quantity cannot be negative!';
+    }
+    // check if item already exists
+    if (inventoryList.some(function (i) { return i.itemId === itemId; })) {
+        return "Error: Item ID ".concat(itemId, " already exists!");
+    }
+    var newItem = {
+        itemId: itemId,
+        itemName: itemName,
+        category: category,
+        quantity: quantity,
+        price: price,
+        supplierName: supplierName,
+        stockStatus: calculateStockStatus(quantity),
+        isPopular: isPopular,
+        comment: comment || ''
     };
-    inventory.push(newItem);
-    return `Item ${name} added to inventory.`;
+    inventoryList.push(newItem);
+    return "Success: Item \"".concat(itemName, "\" added!");
 }
-//update item by id
-function updateItem(id, newQty, newPopular) {
-    //search item by name
-    const item = inventory.find(item => item.id === id);
-    if (!item) {
-        return `Item with ID ${id} not found.`;
-    }
-    item.quantity = newQty;
-    item.isPopular = newPopular;
-    return `Item ${item.id} updated with quantity ${newQty} and isPopular ${newPopular}`;
+//update item by name
+function updateItemByName(itemName, newQuantity, newPrice, newIsPopular) {
+    var item = inventoryList.find(function (i) { return i.itemName.toLowerCase() === itemName.toLowerCase(); });
+    if (!item)
+        return "Error: Item \"".concat(itemName, "\" not found!");
+    if (newQuantity < 0 || newPrice < 0)
+        return 'Error: Values cannot be negative!';
+    item.quantity = newQuantity;
+    item.price = newPrice;
+    item.isPopular = newIsPopular;
+    item.stockStatus = calculateStockStatus(newQuantity);
+    return "Success: Item \"".concat(itemName, "\" updated!");
 }
-//delete item by id
-function deleteItem(id) {
-    //find item by id
-    const itemIndex = inventory.findIndex(item => item.id === id);
-    if (itemIndex === -1) {
-        return `Item with ID ${id} not found.`;
-    }
-    //confirm operation
-    console.log(`Are you sure you want to delete item ${id}?`);
-    console.log(`Deleting....`);
-    //delete item for inventory
-    inventory.splice(itemIndex, 1);
-    return `Item ${id} deleted.`;
+//delete item by name
+function deleteItemByName(itemName) {
+    var index = inventoryList.findIndex(function (i) { return i.itemName.toLowerCase() === itemName.toLowerCase(); });
+    if (index === -1)
+        return "Error: Item \"".concat(itemName, "\" not found!");
+    inventoryList.splice(index, 1);
+    return "Success: Item \"".concat(itemName, "\" deleted!");
 }
-//search item by name
-function searchItem(name) {
-    return inventory.filter(item => item.name.toLowerCase().includes(name.toLowerCase()));
+//find item by name
+function searchItemByName(keyword) {
+    return inventoryList.filter(function (i) { return i.itemName.toLowerCase().includes(keyword.toLowerCase()); });
 }
-//Calculate Stock status
-function getStockStatus(item) {
-    if (item.quantity <= 0) {
-        return "Out of stock";
-    }
-    else if (item.quantity <= 10) {
-        return "Low stock";
-    }
-    else {
-        return "In stock";
-    }
+//get all popular item
+function getPopularItems() {
+    return inventoryList.filter(function (i) { return i.isPopular; });
 }
-//# sourceMappingURL=inventory.js.map
+//render all items
+function renderAllItems() {
+    renderTable(inventoryList);
+}
+//render popular items
+function renderPopularItems() {
+    renderTable(getPopularItems());
+}
+function renderTable(items) {
+    var container = document.getElementById('tableContainer');
+    if (!container)
+        return;
+    var html = "\n    <table style=\"width:100%; border-collapse:collapse; margin-top:16px;\">\n    <tr style=\"background:#f2f2f2;\">\n        <th>ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Price</th>\n        <th>Supplier</th><th>Stock</th><th>Popular</th><th>Comment</th>\n    </tr>";
+    items.forEach(function (item) {
+        var stockColor = item.stockStatus === 'Out of Stock' ? 'red' : item.stockStatus === 'Low Stock' ? 'orange' : 'green';
+        html += "\n    <tr>\n        <td>".concat(item.itemId, "</td>\n        <td>").concat(item.itemName, "</td>\n        <td>").concat(item.category, "</td>\n        <td>").concat(item.quantity, "</td>\n        <td>$").concat(item.price.toFixed(2), "</td>\n        <td>").concat(item.supplierName, "</td>\n        <td style=\"color:").concat(stockColor, "; font-weight:bold;\">").concat(item.stockStatus, "</td>\n        <td>").concat(item.isPopular ? 'Yes' : 'No', "</td>\n        <td>").concat(item.comment || 'N/A', "</td>\n    </tr>");
+    });
+    html += '</table>';
+    container.innerHTML = html;
+}
+window.inventoryApp = {
+    addItem: addItem,
+    updateItemByName: updateItemByName,
+    deleteItemByName: deleteItemByName,
+    searchItemByName: searchItemByName,
+    renderAllItems: renderAllItems,
+    renderPopularItems: renderPopularItems
+};

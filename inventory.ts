@@ -1,77 +1,144 @@
-interface Inventory {
-    name: string;//item name
-    id: number; //item id
-    category: string; //item category
-    price: number; //item price
-    quantity: number; //item quantity
-    supplierName: string; //supplier name
-    isPopular: boolean; //is popular
-    comment?: string; //item comment
+interface InventoryItem {
+    itemId: number;
+    itemName: string;
+    category: 'Electronics' | 'Furniture' | 'Clothing' | 'Tools' | 'Miscellaneous';
+    quantity: number;
+    price: number;
+    supplierName: string;
+    stockStatus: 'In Stock' | 'Low Stock' | 'Out of Stock';
+    isPopular: boolean;
+    comment?: string;
 }
 
-let inventory: Inventory []= [];
+let inventoryList: InventoryItem[] = [];
 
-function addItem(name: string, id: number, category: string, price: number, quantity: number, supplierName: string, isPopular: boolean, comment?: string):string {
-    //check id is unique
-    if (inventory.some(item => item.id === id)) {
-        return `Item with ID ${id} already exists.`;
-    }
-
-    const newItem: Inventory = {
-        name,
-        id,
-        category,
-        price,
-        quantity,
-        supplierName,
-        isPopular
-    };
-
-    inventory.push(newItem);
-        return `Item ${name} added to inventory.`;
+function calculateStockStatus(qty: number): 'In Stock' | 'Low Stock' | 'Out of Stock' {
+  if (qty <= 0) return 'Out of Stock';
+  if (qty <= 10) return 'Low Stock';
+  return 'In Stock';
 }
 
-//update item by id
-function updateItem(id: number, newQty: number, newPopular: boolean): string{
-    //search item by name
-    const item = inventory.find(item => item.id === id);
-    if (!item) {
-        return `Item with ID ${id} not found.`;
-    }
-    item.quantity = newQty;
-    item.isPopular = newPopular;
-    return `Item ${item.id} updated with quantity ${newQty} and isPopular ${newPopular}`;
+function addItem(
+    itemId: number,
+    itemName: string,
+    category: 'Electronics' | 'Furniture' | 'Clothing' | 'Tools' | 'Miscellaneous',
+    quantity: number,
+    price: number,
+    supplierName: string,
+    isPopular: boolean,
+    comment?: string
+): string {
+    
+if (!itemName || !category || !supplierName) {
+    return 'Error: All fields except Comment are required!';
+}
+  if (quantity < 0 || price < 0) {
+    return 'Error: Price & Quantity cannot be negative!';
+}
+  // check if item already exists
+  if (inventoryList.some(i => i.itemId === itemId)) {
+    return `Error: Item ID ${itemId} already exists!`;
 }
 
-//delete item by id
-function deleteItem(id: number): string{
-    //find item by id
-    const itemIndex = inventory.findIndex(item => item.id === id);
-    if (itemIndex === -1) {
-        return `Item with ID ${id} not found.`;
-    }
-    //confirm operation
-    console.log(`Are you sure you want to delete item ${id}?`);
-    console.log(`Deleting....`);
-    //delete item for inventory
-    inventory.splice(itemIndex, 1);
-    return `Item ${id} deleted.`;
+  const newItem: InventoryItem = {
+    itemId,
+    itemName,
+    category,
+    quantity,
+    price,
+    supplierName,
+    stockStatus: calculateStockStatus(quantity),
+    isPopular,
+    comment: comment || ''
+  };
+
+  inventoryList.push(newItem);
+  return `Success: Item "${itemName}" added!`;
 }
 
-//search item by name
-function searchItem(name: string):Inventory[]{
-    return inventory.filter(item => item.name.toLowerCase().includes(name.toLowerCase()));
+//update item by name
+function updateItemByName(
+    itemName: string,
+    newQuantity: number,
+    newPrice: number,
+    newIsPopular: boolean
+): string {
+    const item = inventoryList.find(i => i.itemName.toLowerCase() === itemName.toLowerCase());
+    if (!item) return `Error: Item "${itemName}" not found!`;
+    if (newQuantity < 0 || newPrice < 0) return 'Error: Values cannot be negative!';
+
+  item.quantity = newQuantity;
+  item.price = newPrice;
+  item.isPopular = newIsPopular;
+  item.stockStatus = calculateStockStatus(newQuantity);
+
+  return `Success: Item "${itemName}" updated!`;
 }
 
-//Calculate Stock status
-function getStockStatus(item: Inventory): string{
-    if (item.quantity <= 0) {
-        return "Out of stock";
-    } else if (item.quantity <= 10) {
-        return "Low stock";
-    } else {
-        return "In stock";
-    }
+//delete item by name
+function deleteItemByName(itemName: string): string {
+    const index = inventoryList.findIndex(i => i.itemName.toLowerCase() === itemName.toLowerCase());
+    if (index === -1) return `Error: Item "${itemName}" not found!`;
+    inventoryList.splice(index, 1);
+    return `Success: Item "${itemName}" deleted!`;
+}
+    
+//find item by name
+function searchItemByName(keyword: string): InventoryItem[] {
+    return inventoryList.filter(i => i.itemName.toLowerCase().includes(keyword.toLowerCase()));
 }
 
+//get all popular item
+function getPopularItems(): InventoryItem[] {
+    return inventoryList.filter(i => i.isPopular);
+}
 
+//render all items
+function renderAllItems(): void {
+    renderTable(inventoryList);
+}
+
+//render popular items
+function renderPopularItems(): void {
+    renderTable(getPopularItems());
+}
+
+function renderTable(items: InventoryItem[]): void {
+    const container = document.getElementById('tableContainer');
+    if (!container) return;
+    let html = `
+    <table style="width:100%; border-collapse:collapse; margin-top:16px;">
+    <tr style="background:#f2f2f2;">
+        <th>ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Price</th>
+        <th>Supplier</th><th>Stock</th><th>Popular</th><th>Comment</th>
+    </tr>`;
+
+    items.forEach(item => {
+    const stockColor = item.stockStatus === 'Out of Stock' ? 'red' :item.stockStatus === 'Low Stock' ? 'orange' : 'green';
+
+    html += `
+    <tr>
+        <td>${item.itemId}</td>
+        <td>${item.itemName}</td>
+        <td>${item.category}</td>
+        <td>${item.quantity}</td>
+        <td>$${item.price.toFixed(2)}</td>
+        <td>${item.supplierName}</td>
+        <td style="color:${stockColor}; font-weight:bold;">${item.stockStatus}</td>
+        <td>${item.isPopular ? 'Yes' : 'No'}</td>
+        <td>${item.comment || 'N/A'}</td>
+    </tr>`;
+});
+
+html += '</table>';
+container.innerHTML = html;
+}
+
+(window as any).inventoryApp = {
+  addItem,
+  updateItemByName,
+  deleteItemByName,
+  searchItemByName,
+  renderAllItems,
+  renderPopularItems
+};

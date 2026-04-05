@@ -1,25 +1,128 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Inventory Test</title>
+<title>Inventory System</title>
+<script src="inventory.js"></script>
+<style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; padding: 16px; max-width: 1200px; margin: 0 auto; }
+    .card { background: #f9f9f9; padding: 16px; margin: 16px 0; border-radius: 8px; }
+    input, select, button { padding: 8px; margin: 4px; width: 100%; max-width: 200px; }
+    button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    #message { margin: 10px 0; padding: 10px; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    table { width: 100%; text-align: center; }
+    td, th { padding: 10px; border: 1px solid #ddd; }
+</style>
 </head>
 <body>
-    <h1>Part 1 Test Page</h1>
-    <button onclick="runTest()">Run Test</button>
-    <div id="output"></div>
+<h1>Inventory Management System (TypeScript)</h1>
 
-    <script src="./inventory.js"></script>
-    <script>
-        function runTest() {
-            const result = inventoryApp.addItem("Test Laptop", "ITM001", "Electronics", 1200, 3, "SupA", true);
-            document.getElementById('output').innerHTML = `<p>${result}</p>`;
-            
-            const item = inventoryApp.inventory[0];
-            if(item) {
-                const status = inventoryApp.getStockStatus(item);
-                document.getElementById('output').innerHTML += `<p>Status: ${status}</p>`;
-            }
-        }
-    </script>
+<!-- message area -->
+<div id="message"></div>
+
+<!-- add item form -->
+<div class="card">
+    <h3>Add New Item</h3>
+    <input type="number" id="itemId" placeholder="Item ID (unique)">
+    <input type="text" id="itemName" placeholder="Item Name">
+    <select id="category">
+        <option value="">Select Category</option>
+        <option>Electronics</option>
+        <option>Furniture</option>
+        <option>Clothing</option>
+        <option>Tools</option>
+        <option>Miscellaneous</option>
+    </select>
+    <input type="number" id="quantity" placeholder="Quantity">
+    <input type="number" id="price" placeholder="Price">
+    <input type="text" id="supplierName" placeholder="Supplier Name">
+    <label><input type="checkbox" id="isPopular"> Popular Item</label>
+    <input type="text" id="comment" placeholder="Comment (optional)">
+    <button onclick="handleAdd()">Add Item</button>
+</div>
+
+<!-- search and actions -->
+<div class="card">
+    <h3>Search & Actions</h3>
+    <input type="text" id="searchName" placeholder="Search by Name">
+    <button onclick="handleSearch()">Search</button>
+    <button onclick="renderAll()">Show All</button>
+    <button onclick="renderPopular()">Show Popular Only</button>
+
+    <h4>Update / Delete by Name</h4>
+    <input type="text" id="operateName" placeholder="Item Name">
+    <input type="number" id="newQty" placeholder="New Qty">
+    <input type="number" id="newPrice" placeholder="New Price">
+    <label><input type="checkbox" id="newPopular"> Popular</label>
+    <button onclick="handleUpdate()">Update</button>
+    <button onclick="handleDelete()">Delete</button>
+</div>
+
+<!-- table container -->
+<div id="tableContainer"></div>
+
+<script type="module">
+    import { renderAllItems, renderPopularItems } from './inventory.js';
+    window.renderAll = renderAllItems;
+    window.renderPopular = renderPopularItems;
+</script>
+
+<script>
+    //message display
+    function showMessage(text, isSuccess = false) {
+        const msg = document.getElementById('message');
+        msg.textContent = text;
+        msg.className = isSuccess ? 'success' : 'error';
+    }
+
+    //add item
+    function handleAdd() {
+        const itemId = Number(document.getElementById('itemId').value);
+        const itemName = document.getElementById('itemName').value.trim();
+        const category = document.getElementById('category').value;
+        const quantity = Number(document.getElementById('quantity').value);
+        const price = Number(document.getElementById('price').value);
+        const supplierName = document.getElementById('supplierName').value.trim();
+        const isPopular = document.getElementById('isPopular').checked;
+        const comment = document.getElementById('comment').value.trim();
+
+        const res = window.inventoryApp.addItem(
+        itemId, itemName, category, quantity, price, supplierName, isPopular, comment
+    );
+    showMessage(res, res.startsWith('Success'));
+    renderAll();
+    }
+
+    //search item by name
+    function handleSearch() {
+        const keyword = document.getElementById('searchName').value.trim();
+        const list = window.inventoryApp.searchItemByName(keyword);
+        renderTable(list);
+        showMessage(`Found ${list.length} items`, true);
+    }
+
+    //update item by name
+    function handleUpdate() {
+        const name = document.getElementById('operateName').value.trim();
+        const qty = Number(document.getElementById('newQty').value);
+        const price = Number(document.getElementById('newPrice').value);
+        const popular = document.getElementById('newPopular').checked;
+        const res = window.inventoryApp.updateItemByName(name, qty, price, popular);
+        showMessage(res, res.startsWith('Success'));
+        renderAll();
+    }
+
+    //delete item by name
+    function handleDelete() {
+        const name = document.getElementById('operateName').value.trim();
+        if (!confirm(`Confirm delete: ${name}?`)) return;
+        const res = window.inventoryApp.deleteItemByName(name);
+        showMessage(res, res.startsWith('Success'));
+        renderAll();
+    }
+</script>
 </body>
 </html>
