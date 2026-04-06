@@ -1,0 +1,26 @@
+input, select, button {
+  margin: 5px;
+  padding: 5px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 15px;
+}
+td, th {
+  border: 1px solid #ccc;
+  padding: 6px;
+}
+th {
+  background-color: #eee;
+}
+#message {
+  padding: 8px;
+  margin: 10px 0;
+}
+.success {
+  background: #e6f9e6;
+}
+.error {
+  background: #ffe6e6;
+}

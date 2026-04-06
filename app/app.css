@@ -1,0 +1,17 @@
+.navbar {
+  background: #eee;
+  padding: 8px;
+  margin-bottom: 20px;
+}
+.navbar a {
+  margin-right: 12px;
+  text-decoration: none;
+  color: #333;
+}
+.navbar a.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.container {
+  padding: 10px;
+}
