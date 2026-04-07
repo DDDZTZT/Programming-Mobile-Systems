@@ -1,0 +1,17 @@
+h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: #212529;
+}
+
+p {
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #495057;
+}
+
+ul {
+  margin-left: 20px;
+  line-height: 1.7;
+  color: #495057;
+}

@@ -1,0 +1,51 @@
+<h1>Inventory Management</h1>
+
+<div id="message" [class.success]="isSuccess" [class.error]="!isSuccess">{{ message }}</div>
+
+<div class="card">
+  <h3>Add New Item</h3>
+  <input type="number" [(ngModel)]="itemId" placeholder="Item ID (unique)">
+  <input type="text" [(ngModel)]="itemName" placeholder="Item Name">
+  <select [(ngModel)]="category">
+    <option value="">Select Category</option>
+    <option>Electronics</option>
+    <option>Furniture</option>
+    <option>Clothing</option>
+    <option>Tools</option>
+    <option>Miscellaneous</option>
+  </select>
+  <input type="number" [(ngModel)]="quantity" placeholder="Quantity">
+  <input type="number" [(ngModel)]="price" placeholder="Price">
+  <input type="text" [(ngModel)]="supplierName" placeholder="Supplier Name">
+  <label><input type="checkbox" [(ngModel)]="isPopular"> Popular Item</label>
+  <input type="text" [(ngModel)]="comment" placeholder="Comment (optional)">
+  <button (click)="addItem()">Add Item</button>
+</div>
+
+<div class="card">
+  <h3>Update / Delete by Name</h3>
+  <input type="text" [(ngModel)]="operateName" placeholder="Item Name">
+  <input type="number" [(ngModel)]="newQty" placeholder="New Qty">
+  <input type="number" [(ngModel)]="newPrice" placeholder="New Price">
+  <label><input type="checkbox" [(ngModel)]="newPopular"> Popular</label>
+  <button (click)="updateItemByName()">Update</button>
+  <button (click)="deleteItemByName()">Delete</button>
+</div>
+
+<table>
+  <tr>
+    <th>ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Price</th>
+    <th>Supplier</th><th>Stock</th><th>Popular</th><th>Comment</th>
+  </tr>
+  <tr *ngFor="let item of inventoryList">
+    <td>{{ item.itemId }}</td>
+    <td>{{ item.itemName }}</td>
+    <td>{{ item.category }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>${{ item.price.toFixed(2) }}</td>
+    <td>{{ item.supplierName }}</td>
+    <td [style.color]="getStockColor(item.stockStatus)">{{ item.stockStatus }}</td>
+    <td>{{ item.isPopular ? 'Yes' : 'No' }}</td>
+    <td>{{ item.comment || 'N/A' }}</td>
+  </tr>
+</table>

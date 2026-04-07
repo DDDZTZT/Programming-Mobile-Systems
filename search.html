@@ -1,0 +1,28 @@
+<h1>Search Inventory</h1>
+
+<div class="search-bar">
+  <input type="text" [(ngModel)]="searchKeyword" placeholder="Search by Item Name">
+  <button (click)="searchItems()">Search</button>
+  <button (click)="showPopularOnly()">Show Popular Only</button>
+  <button (click)="searchResults = [...inventoryList]">Show All</button>
+</div>
+
+<table *ngIf="searchResults.length > 0">
+  <tr>
+    <th>ID</th><th>Name</th><th>Category</th><th>Qty</th><th>Price</th>
+    <th>Supplier</th><th>Stock</th><th>Popular</th><th>Comment</th>
+  </tr>
+  <tr *ngFor="let item of searchResults">
+    <td>{{ item.itemId }}</td>
+    <td>{{ item.itemName }}</td>
+    <td>{{ item.category }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>${{ item.price.toFixed(2) }}</td>
+    <td>{{ item.supplierName }}</td>
+    <td [style.color]="getStockColor(item.stockStatus)">{{ item.stockStatus }}</td>
+    <td>{{ item.isPopular ? 'Yes' : 'No' }}</td>
+    <td>{{ item.comment || 'N/A' }}</td>
+  </tr>
+</table>
+
+<p *ngIf="searchResults.length === 0">No items found.</p>
